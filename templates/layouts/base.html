@@ -1,0 +1,503 @@
+{% load static widget_tweaks poll_extras %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Agro Bravo</title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/logo-agro.png' %}">
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+    <link type="text-success" href="{% static 'vendor/bootstrap-select/dist/css/bootstrap-select.min.css' %}"
+          rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+    <link href="{% static 'css/adminlte.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+
+
+<!--**********************************
+    Main wrapper start
+***********************************-->
+<div id="wrapper">
+
+    <!--*******************
+        Preloader start
+    ********************-->
+    <div class="preloader flex-column justify-content-center align-items-center">
+        <img class="animation__shake" src="{% static 'images/logo-agro.png' %}" alt="AdminLTELogo" height="150"
+             width="150">
+    </div>
+    <!--*******************
+        Preloader end
+    ********************-->
+
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-dark bg-primary" style="border-color: #fff;">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link text-white" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <nav class="navbar navbar-expand">
+                    <button class="navbar-toggler" type="button" data-toggle="collapse"
+                            data-target="#navbarTogglerDemo03"
+                            aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse ">
+                        <div class="col-md-12 ">
+                            <div class="row cashier_balance_list d-flex justify-content-between">
+                                {% if request.user.is_superuser  or request.user.user_type == 'admin' %}
+                                    {% for cashier in cashiers %}
+                                        {% if cashier.payment_type == 'usd' %}
+                                            <div class="col-md-2 ml-1">
+                                                <div class="row" id="rate_area_{{ cashier.pk }}">
+                                            <span class="badge badge-light badge-lg  text-white">Баланс: <span
+                                                    id="balance_value_1">{{ cashier.amount|remove_zero }} $</span></span>
+                                                </div>
+                                            </div>
+                                        {% elif cashier.payment_type == 'uzs' %}
+                                            <div class="col-md-2 mr-5">
+                                                <div class="row" id="rate_area_{{ cashier.pk }}">
+                                            <span class="badge badge-light badge-lg  text-white">Баланс: <span
+                                                    id="balance_value_2">{{ cashier.amount|remove_zero }} Сум</span></span>
+                                                </div>
+                                            </div>
+                                        {% elif cashier.payment_type == 'bank' %}
+                                            <div class="col-md-2 mr-5">
+                                                <div class="row" id="rate_area_{{ cashier.pk }}">
+                                            <span class="badge badge-primary badge-lg  text-white">Баланс: <span
+                                                    id="balance_value_3">{{ cashier.amount|remove_zero }} Банк</span></span>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <div>
+                                        <div class="row">
+                                            <div class="" id="rate_span">
+                                                    <span class="badge badge-light badge-lg mr-5">Курс доллара: <span
+                                                            id="rate_area">{{ ps }}</span></span>
+                                            </div>
+                                            <div class="">
+                                                {% if request.user.is_superuser or request.user.user_type == 'admin' %}
+                                                    <a class="btn btn-light btn-sm sharp text-black"
+                                                       data-toggle="modal"
+                                                       data-target="#rateModal"><i class="fa fa-pencil-square-o mt-1"></i></a>
+                                                    <a class="btn btn-success btn-sm sharp text-white"
+                                                       data-toggle="modal"
+                                                       data-target="#ConversionFirmModal"><i
+                                                            class="fa fa-money mt-1"></i></a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                </nav>
+            </li>
+        </ul>
+
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
+
+
+            <li class="nav-item d-flex badge badge-light" >
+                <div class="nav-link text-black" style="height: 30px;">
+                    <i class="fas fa-user "></i>
+                </div>
+                <div class="nav-link font-weight-bold text-black" style="height: 30px;" >
+                    {{ request.user }}
+                </div>
+                <div class="nav-link "  style="height: 30px;">
+                    <a href="{% url 'logout' %}"><i class="fa fa-sign-out" style="font-size: 15px;"></i></a>
+                </div>
+            </li>
+
+
+        </ul>
+    </nav>
+    <!-- /.navbar -->
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="{% url 'product' %}" class="brand-link">
+            <img src="{% static 'images/logo-agro.png' %}" alt="Agro Bravo"
+                 class="brand-image img-circle elevation-3 h-50"
+            >
+            <span class="brand-text text-white">Agro Bravo</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar Menu -->
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false">
+                    <!-- Add icons to the links using the .nav-icon class
+                         with font-awesome or any other icon font library -->
+                    <li class="nav-item ">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fa fa-home"></i>
+                            <p>
+                                Главное
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'counter_party' %}" class="nav-link ">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Контр агенты</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'order' %}" aria-expanded="false" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Заказы</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'product' %}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Продукты</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>
+                                        Отчёты
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="{% url 'report_income' %}" class="nav-link">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Доход</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{% url 'report-outcome' %}" class="nav-link">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Расход</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item ">
+                        <a href="#" class="nav-link active">
+                            <i class="nav-icon fa fa-cog"></i>
+                            <p>
+                                Настройки
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>
+                                        Сотрудники
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="{% url 'workers' %}" class="nav-link">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Сотрудники</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{% url 'cars' %}" class="nav-link">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Машины сотрудников</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'income_list' %}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Постовщики <br>
+                                        и закупщики</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>
+                                        Расходы
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="{% url 'outlay_cat' %}" class="nav-link">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Категория расходов</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{% url 'outlay' %}" class="nav-link">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Добавить расход</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{% url 'return_outlay' %}" class="nav-link">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Добавить возврат расхода</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </li>
+
+                </ul>
+
+            </nav>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+    </aside>
+
+
+    <!--**********************************
+        Content body start
+    ***********************************-->
+    <div class="content-wrapper" style="padding-top: 20px;">
+        <!-- row -->
+        {% block content %}
+
+        {% endblock %}
+    </div>
+    <!--**********************************
+        Content body end
+    ***********************************-->
+
+
+    <div class="modal fade" id="rateModal" tabindex="12"
+         aria-labelledby="rateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Изменить курс доллара
+                </div>
+                <div class="modal-body">
+                    <form id="change_rate_form" action="{% url 'other_action' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_rate">
+                        <label for="id_rate">Новый курс доллара</label>
+                        <input id="id_rate" name="rate" class="form-control" required min="1"
+                               type="number">
+                        <button type="button" onclick="change_rate(
+                                                {
+                                                'action': 'change_rate',
+                                                'rate': $('#id_rate').val()
+                                                }
+                                                )"
+                                class="btn btn-primary mt-4 float-right">Сохранить
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="ConversionFirmModal" tabindex="-1" aria-labelledby="ConversionFirmModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header " style='border-bottom: 0;'>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered table-sm table-hover table-striped">
+                        <tbody>
+                        <tr>
+                            <td class="">Сум</td>
+                            <td class="divide">{{ contr_agent.balance_uzs }}</td>
+                        </tr>
+                        <tr>
+                            <td class="">Доллар</td>
+                            <td class="divide">{{ contr_agent.balance_usd }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <form id="balance_income" method="post" action="{% url 'other_action' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="conversion_balance">
+                        {% for form in convert_form %}
+                            <div id="id_{{ form.name }}_group" class="col-12">
+                                {{ form.label_tag }}
+                                {{ form|add_class:'form-control'|attr:'autocomplete:off' }}
+                            </div>
+                        {% endfor %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" form="balance_income" onclick="conversion_balance(
+                                                                                            {
+                                                                                            'action': 'conversion_balance',
+                                                                                            'cashiers': $('#id_cashiers').val(),
+                                                                                            'cashiers_second': $('#id_cashiers_second').val(),
+                                                                                            'amount': $('#id_amount').val(),
+                                                                                            'amount_second': $('#id_amount_second').val(),
+                                                                                            'comment': $('#id_comment').val(),
+                                                                                            })">Конвертация
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!--**********************************
+    Main wrapper end
+***********************************-->
+
+<!--**********************************
+    Scripts
+***********************************-->
+<!-- Required vendors -->
+<script>
+    async function conversion_balance(data, url = '{% url 'other_action' %}') {
+        let form_data = new FormData();
+        for (var key in data) {
+            form_data.append(key, data[key]);
+        }
+        const response = await fetch(url, {
+            method: "post",
+            cache: 'no-cache',
+            body: form_data
+        })
+            .then(response => {
+                return response.json();
+            })
+            .then((response_data) => {
+                console.log(response_data);
+                if (`${response_data['cashier_type_first']}` === 'uzs') {
+                    let cashier_sum = parseInt(`${response_data['amount_first']}`) - parseInt(document.getElementById('balance_value_2').textContent.replace(/\D+/g, ''))
+                    $(`#balance_value_2`).text(cashier_sum.toString().slice(1).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' Сум ')
+                } else if (`${response_data['cashier_type_first']}` === 'usd') {
+                    let cashier_dollar = parseInt(`${response_data['amount_first']}`) - parseInt(document.getElementById('balance_value_1').textContent.replace(/\D+/g, ''))
+                    $(`#balance_value_1`).text(cashier_dollar.toString().slice(1).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' $ ')
+                } else if (`${response_data['cashier_type_first']}` === 'bank') {
+                    let cashier_bank = parseInt(`${response_data['amount_first']}`) - parseInt(document.getElementById('balance_value_3').textContent.replace(/\D+/g, ''))
+                    $(`#balance_value_3`).text(cashier_bank.toString().slice(1).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' Банк ')
+                }
+
+                if (`${response_data['cashier_type_second']}` === 'uzs') {
+                    let cashier_sum = parseInt(`${response_data['amount_second']}`) + parseInt(document.getElementById('balance_value_2').textContent.replace(/\D+/g, ''))
+                    $(`#balance_value_2`).text(cashier_sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' Сум ')
+                } else if (`${response_data['cashier_type_second']}` === 'usd') {
+                    let cashier_dollar = parseInt(`${response_data['amount_second']}`) + parseInt(document.getElementById('balance_value_1').textContent.replace(/\D+/g, ''))
+                    $(`#balance_value_1`).text(cashier_dollar.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' $ ')
+                } else if (`${response_data['cashier_type_second']}` === 'bank') {
+                    let cashier_bank = parseInt(`${response_data['amount_second']}`) + parseInt(document.getElementById('balance_value_3').textContent.replace(/\D+/g, ''))
+                    $(`#balance_value_3`).text(cashier_bank.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' Банк ')
+                }
+                $(`#ConversionFirmModal`).modal('toggle')
+            })
+            .catch(response => {
+                alert('Error')
+            })
+    }
+
+    async function change_rate(data, url = '{% url 'other_action' %}') {
+        let form_data = new FormData();
+        for (var key in data) {
+            form_data.append(key, data[key]);
+        }
+        const response = await fetch(url, {
+            method: "post",
+            cache: 'no-cache',
+            body: form_data
+        })
+            .then(response => {
+                return response.json();
+            })
+            .then((response_data) => {
+                console.log(response_data);
+                $(`#rateModal`).modal('toggle')
+                $(`#rate_area`).text(`${response_data['rate']}`)
+            })
+            .catch(response => {
+                alert('Error')
+            })
+    }
+
+</script>
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+
+
+
+<!-- Bootstrap 4 -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+
+<!-- AdminLTE App -->
+<script src="{% static 'plugins/adminlte/adminlte.js' %}"></script>
+<script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        const url = window.location;
+
+        $('ul.nav-sidebar a').filter(function () {
+            return this.href == url;
+        }).parent().addClass('active');
+
+        $('ul.nav-treeview a').filter(function () {
+            return this.href == url;
+        }).parentsUntil(".sidebar-menu > .nav-treeview").addClass('menu-open');
+
+        $('ul.nav-treeview a').filter(function () {
+            return this.href == url;
+        }).addClass('active');
+
+        $('li.has-treeview a').filter(function () {
+            return this.href == url;
+        }).addClass('active');
+
+        $('ul.nav-treeview a').filter(function () {
+            return this.href == url;
+        }).parentsUntil(".sidebar-menu > .nav-treeview").children(0).addClass('active');
+
+    });
+</script>
+
+
+
+{% block extra_js %}
+{% endblock %}
+
+</body>
+</html>
